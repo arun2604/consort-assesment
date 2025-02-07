@@ -22,7 +22,6 @@ const locationSlice = createSlice({
         },
         setInsideGeofence: (state, action: PayloadAction<boolean>) => {
             state.insideGeofence = action.payload;
-            console.log(action.payload, state.insideGeofence);
         },
     },
 });

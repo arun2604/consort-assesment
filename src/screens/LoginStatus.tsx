@@ -9,7 +9,7 @@ import TextBox from "../components/TextBox";
 
 const OFFICE_LAT = 11.0255797;
 const OFFICE_LNG = 76.9143727;
-const GEOFENCE_RADIUS = 30;
+const GEOFENCE_RADIUS = 100;
 const OFFICE_START_TIME = "09:00";
 const OFFICE_END_TIME = "19:00";
 
@@ -32,6 +32,7 @@ const LoginStatus: React.FC = () => {
         const watchId = Geolocation.watchPosition(
             async (position) => {
                 const { latitude, longitude, accuracy } = position.coords;
+                console.log(accuracy, "accuracy");
                 dispatch(updateLocation({ latitude, longitude }));
                 await checkGeofence(latitude, longitude);
             },
@@ -57,9 +58,7 @@ const LoginStatus: React.FC = () => {
         const distance = getDistance(lat, lng, OFFICE_LAT, OFFICE_LNG);
         const now = new Date();
         const currentTime = now.toTimeString().slice(0, 5);
-
-        const hasEnteredToday = await AsyncStorage.getItem("hasEnteredToday");
-        const hasExitedToday = await AsyncStorage.getItem("hasExitedToday");
+        console.log(distance, "distance", distance <= GEOFENCE_RADIUS, !insideGeofenceRef.current)
 
         if (distance <= GEOFENCE_RADIUS && !insideGeofenceRef.current) {
             dispatch(setInsideGeofence(true));
@@ -111,6 +110,7 @@ const LoginStatus: React.FC = () => {
     };
 
     const submitReason = () => {
+        if (reason.trim() === '') return;
         console.log(`Reason for ${promptType}:`, reason);
         setShowModal(false);
         setReason("");
