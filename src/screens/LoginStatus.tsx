@@ -5,6 +5,7 @@ import Toast from "react-native-toast-message";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { updateLocation, setInsideGeofence } from "../redux/slice/locationSlice";
 import { useAppDispatch, useAppSelector } from "../redux/Store";
+import TextBox from "../components/TextBox";
 
 const OFFICE_LAT = 11.0255797;
 const OFFICE_LNG = 76.9143727;
@@ -31,7 +32,6 @@ const LoginStatus: React.FC = () => {
         const watchId = Geolocation.watchPosition(
             async (position) => {
                 const { latitude, longitude, accuracy } = position.coords;
-                console.log(accuracy, "accuracy");
                 dispatch(updateLocation({ latitude, longitude }));
                 await checkGeofence(latitude, longitude);
             },
@@ -58,27 +58,20 @@ const LoginStatus: React.FC = () => {
         const now = new Date();
         const currentTime = now.toTimeString().slice(0, 5);
 
-        console.log(distance, distance <= GEOFENCE_RADIUS, insideGeofenceRef.current);
-
         const hasEnteredToday = await AsyncStorage.getItem("hasEnteredToday");
         const hasExitedToday = await AsyncStorage.getItem("hasExitedToday");
 
         if (distance <= GEOFENCE_RADIUS && !insideGeofenceRef.current) {
-            console.log("inside In dialouge")
-
             dispatch(setInsideGeofence(true));
             insideGeofenceRef.current = true;
-
             showToast("Entered Office");
             await AsyncStorage.setItem("hasEnteredToday", "true");
 
             if (currentTime > OFFICE_START_TIME) {
                 triggerPrompt("late");
             }
-
         }
         else if (distance > GEOFENCE_RADIUS && insideGeofenceRef.current) {
-            console.log("inside Out dialouge")
             dispatch(setInsideGeofence(false));
             insideGeofenceRef.current = false;
             showToast("Exited Office");
@@ -90,45 +83,6 @@ const LoginStatus: React.FC = () => {
 
         }
     };
-
-    // const checkGeofence = async (lat: number, lng: number) => {
-    //     const distance = getDistance(lat, lng, OFFICE_LAT, OFFICE_LNG);
-    //     const now = new Date();
-    //     const currentTime = now.toTimeString().slice(0, 5);
-
-    //     console.log(distance, distance <= GEOFENCE_RADIUS, insideGeofence);
-
-    //     const hasEnteredToday = await AsyncStorage.getItem("hasEnteredToday");
-    //     const hasExitedToday = await AsyncStorage.getItem("hasExitedToday");
-
-    //     if (distance <= GEOFENCE_RADIUS && !insideGeofence) {
-    //         console.log("inside In dialouge")
-
-    //         dispatch(setInsideGeofence(true));
-
-    //         if (!hasEnteredToday) {
-    //             showToast("Entered Office");
-    //             await AsyncStorage.setItem("hasEnteredToday", "true");
-
-    //             if (currentTime > OFFICE_START_TIME) {
-    //                 triggerPrompt("late");
-    //             }
-    //         }
-    //     }
-    //     else if (distance > GEOFENCE_RADIUS && insideGeofence) {
-    //         console.log("inside Out dialouge")
-    //         dispatch(setInsideGeofence(false));
-
-    //         if (!hasExitedToday) {
-    //             showToast("Exited Office");
-    //             await AsyncStorage.setItem("hasExitedToday", "true");
-
-    //             if (currentTime < OFFICE_END_TIME) {
-    //                 triggerPrompt("early");
-    //             }
-    //         }
-    //     }
-    // };
 
     const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
         const Radius = 6371e3;
@@ -190,12 +144,7 @@ const LoginStatus: React.FC = () => {
                 <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0,0,0,0.5)" }}>
                     <View style={{ width: 300, padding: 20, backgroundColor: "white", borderRadius: 10 }}>
                         <Text>{promptType === "late" ? "Enter reason for late arrival:" : "Enter reason for early departure:"}</Text>
-                        <TextInput
-                            style={{ borderWidth: 1, borderColor: "#ccc", padding: 10, marginTop: 10 }}
-                            placeholder="Type your reason..."
-                            value={reason}
-                            onChangeText={setReason}
-                        />
+                        <TextBox setValue={setReason} value={reason} />
                         <Button title="Submit" onPress={submitReason} />
                     </View>
                 </View>

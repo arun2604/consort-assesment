@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { View, Text, TextInput, Button, FlatList, TouchableOpacity, Permission } from 'react-native'
 import { useAppDispatch, useAppSelector } from '../redux/Store'
 import { addNewTask, deleteCurrentTask, editCurrentTask } from "../redux/slice/TaskSlice"
+import TextBox from '../components/TextBox'
 
 interface Task {
     id: number
@@ -41,12 +42,7 @@ const Tasks: React.FC = () => {
         <View style={{ padding: 20 }}>
             <Text style={{ fontSize: 24, marginBottom: 10 }}>To-Do List</Text>
 
-            <TextInput
-                value={task}
-                onChangeText={setTask}
-                placeholder={editingTask ? 'Edit Task' : 'Enter Task'}
-                style={{ borderWidth: 1, padding: 8, marginBottom: 10 }}
-            />
+            <TextBox setValue={setTask} value={task} />
 
             <Button
                 title={editingTask ? 'Update Task' : 'Add Task'}
